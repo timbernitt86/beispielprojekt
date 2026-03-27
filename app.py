@@ -1,13 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, request, redirect, url_for, session, render_template_string
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-# Dummy User (später DB)
+# Dummy User
 USER = {
     "email": "admin@test.de",
     "password": "1234"
 }
+
+# HTML direkt aus Dateien laden
+def load_html(filename):
+    with open(filename, "r", encoding="utf-8") as f:
+        return f.read()
 
 @app.route("/")
 def home():
@@ -27,13 +32,15 @@ def login():
         else:
             return "Login fehlgeschlagen"
 
-    return render_template("login.html")
+    return render_template_string(load_html("login.html"))
 
 @app.route("/dashboard")
 def dashboard():
     if "user" not in session:
         return redirect(url_for("login"))
-    return render_template("dashboard.html", user=session["user"])
+
+    html = load_html("dashboard.html")
+    return render_template_string(html, user=session["user"])
 
 @app.route("/logout")
 def logout():
